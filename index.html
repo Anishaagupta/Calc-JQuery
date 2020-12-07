@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jquery-3.5.1.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <title>Document</title>
+    <!-- <link rel="stylesheet" src="styles.css"/>
+    
+	<script type="text/javascript" src="/src.js"></script> -->
+</head>
+<body>
+    <style>
+        html, body {
+    font-family: 'Orbitron', sans-serif;
+    background-color: #DECEC7;
+  }
+  
+  #calculator {
+    height: 420px;
+    width: 270px;
+    margin-top: 3%;
+    margin-right: auto;
+    margin-left: auto;
+    /*border: solid 1px #B3B5BE;*/
+    padding: 10px;
+    background-color: #D1D2D6;
+    border-radius: 20px;
+    box-shadow: 6px 9px 30px 0 rgba(0, 0, 0, 0.68), inset -2px -5px 15px 0 #584c46;
+  }
+  
+  #output {
+    border: solid 2px #B3B5BE;
+    border-radius: 7px;
+    text-align: right;
+    height: 50px;
+    width: 90%;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #D6E1E3;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  #input {
+    display: inline-block;
+    position: absolute;
+    width: 280px;
+    height: auto;
+    margin-top: 15px;
+    margin-left: 5px;
+  }
+  
+  #result {
+    font-size: 35px;
+  }
+  
+  .btn {
+    height: 40px;
+    width: 50px;
+    margin: 0px 4px 12px 8px;
+    color: #FFF;
+    border-radius: 7px;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: #515473;
+    box-shadow: 0 3px #2D304E;
+  }
+  
+  .btn, .btn:hover, .btn:active, .btn:focus, .btn:active:focus {
+    color: #FFF;
+    outline: none;
+  }
+  
+  .btn:active {
+    box-shadow: 0 0px;
+    transform: translateY(3px);
+  }
+  
+  .operator {
+    background-color: #535F6B;
+    box-shadow: 0 3px #313D48;
+  }
+  
+  .clear {
+    background-color: #D27182;
+    box-shadow: 0 3px #9D2F42;
+  }
+  
+  #clear-all {
+    width: 115px
+  }
+  
+  #equal {
+    height: 40px;
+   width: 115px;
+    margin-top: -50px;
+  }
+    </style>
+    <!--   <div class="container"> -->
+        <div id="calculator">
+            <div id="output">
+              <div id="all-input">0</div>
+              <div id="result">0</div>
+            </div>
+            <div id="input">
+              <button id="clear-all" class="btn clear">C</button>
+              <button id="clear-last" class="btn clear">CE</button>
+              <button id="divide" class="btn operator">&divide;</button>
+              <!--  -->
+              <button id="seven" class="btn digit">7</button>
+              <button id="eight" class="btn digit">8</button>
+              <button id="nine" class="btn digit">9</button>
+              <button id="multiply" class="btn operator">&times;</button>
+              <!--  -->
+              <button id="four" class="btn digit">4</button>
+              <button id="five" class="btn digit">5</button>
+              <button id="six" class="btn digit">6</button>
+              <button id="minus" class="btn operator">-</button>
+              <!--  -->
+              <button id="one" class="btn digit">1</button>
+              <button id="two" class="btn digit">2</button>
+              <button id="three" class="btn digit">3</button>
+              <!-- <button id="empty" class="btn"></button> -->
+              <!--  -->
+              <button id="plus" class="btn operator">+</button>
+              <button id="zero" class="btn digit">0</button>
+              <button id="point" class="btn dot">.</button>
+              <button id="equal" class="btn equal">=</button>
+              
+            </div>
+          </div>
+      <!--   </div> -->
+    <script>window.onload = function() {
+        var inputToDisplay = [];
+        var result = 0;
+        var currResult = 0;
+        var currValue = [];
+        var currOperator = "+";
+      
+        //handle digits 
+        $(".digit").each(function(index, button) {
+          var digit = $(this).text();
+          $(this).click(function(e) {
+            if (currValue.length < 8) {
+              if (inputToDisplay.length === 0) {
+                $("#all-input").text("0");
+                result = 0;
+              }
+              if (!(currValue.length === 0 && digit == "0")) {
+                currValue.push(digit);
+                $("#result").text(currValue.join(""));
+              }
+            }
+          });
+        });
+        
+        //handle dot
+        $(".dot").click(function(e) {
+          var dot = $(this).text();
+          if (currValue.length === 0) {
+            currValue.push("0");
+          }
+          if (currValue.length <8 && !currValue.includes(".")) {
+            currValue.push(dot);
+            $("#result").text(currValue.join(""));
+          }
+        })
+      
+        // handle math operators
+        $(".operator").each(function(index, button) {
+          var operator = $(this).text();
+          $(this).click(function(e) {
+            if (inputToDisplay.length < 17) {
+              if (checkLastCharIsOperator(inputToDisplay) && currValue.length === 0) {
+                inputToDisplay.pop();
+                inputToDisplay.push(operator);
+              }
+              if (currValue.length !== 0) {
+                if (currValue[currValue.length-1] === ".") {
+                  currValue.pop();
+                }
+                inputToDisplay.push(currValue.join(""));
+                inputToDisplay.push(operator);
+                currResult = calculate(currValue, currOperator, currResult);
+              }
+              if (currValue.length === 0 && result !== 0) {
+                inputToDisplay.push(result);
+                inputToDisplay.push(operator);
+                currValue = [result];
+                currResult = calculate(currValue, currOperator, currResult);
+                result = 0;
+              }
+                currValue = [];
+                currOperator = operator;
+                $("#all-input").text(inputToDisplay.join(""));
+                $("#result").text("0");
+            }
+          });
+        });
+      
+        // clear all input
+        $("#clear-all").click(function(e) {
+          $("#all-input").text("0");
+          $("#result").text("0");
+          result = 0;
+          currResult = 0;
+          inputToDisplay = [];
+          currValue = [];
+        });
+      
+        // clear last number
+        $("#clear-last").click (function (e) {
+          if (currValue.length !== 0) {
+            $("#result").text("0");
+            currValue = [];
+          }
+          if (result !== 0) {
+            result = 0;
+            $("#result").text("0");
+            $("#all-input").text("0");
+          }
+        });
+      
+      function calculate (value, currOperator, currResult) {
+        if (currOperator === "+") {
+          currResult += parseFloat(value.join(""));
+        }
+        else if (currOperator === "-") {
+          currResult -= parseFloat(value.join(""));
+        }
+        else if (currOperator === "\xF7") {
+          currResult /= parseFloat(value.join(""));
+        }
+        else if (currOperator === "\xD7") {
+          currResult *= parseFloat(value.join(""));
+        }
+        return currResult;
+      }
+      
+        // handle equal input
+        $("#equal").click(function(e) {
+          if (inputToDisplay.length !== 0 && currValue.length !== 0) {
+            if (currValue[currValue.length-1] === ".") {
+              currValue.pop();
+            }
+            inputToDisplay.push(currValue.join(""));
+            inputToDisplay.push($(this).text());
+            $("#all-input").text(inputToDisplay.join(""));
+            currResult = calculate(currValue, currOperator, currResult);
+            result = formatResult(currResult);
+            $("#result").text(result);
+            currValue = [];
+            currOperator = "+";
+            inputToDisplay = [];
+            currResult = 0;
+          }
+        });
+      }
+      
+      var operators =["-", "+", "\xD7", "\xF7"];
+      
+      // returns true if last input char is operator, if digit - false
+      function checkLastCharIsOperator(input) {
+        if (operators.includes(input[input.length - 1])) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      
+      //format the result to fit in display
+      function formatResult(result) {
+        var result_string = result.toString();
+        if (result_string.length > 8) {
+          if (result_string.indexOf(".") !== -1 && result_string.indexOf(".") < 8) {
+            result = result.toFixed(7-result_string.indexOf("."));
+            while (result.endsWith("0")) {
+              result = result.substring(0, result.length-1);
+            }
+          }
+          else {
+            result = "too big";
+          }
+        }
+        return result;
+      }
+      </script>
+</body>
+</html>
